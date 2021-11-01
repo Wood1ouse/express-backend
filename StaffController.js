@@ -1,60 +1,44 @@
-import { connection } from "./db.js";
+import StaffService from "./StaffService.js";
 
 class StaffController {
 	create(req, res) {
-		const { Login, PasswordHash, Salt } = req.body;
 		try {
-			connection.query(
-				`INSERT INTO Staff (Login, PasswordHash, Salt) VALUES ('${Login}', '${PasswordHash}', '${Salt}')`,
-				(error) => {
-					if (error) res.status(500).json(error);
-					console.log("Succesfully Added!");
-					res.send(req.body);
-				},
-			);
-		} catch (error) {
-			console.log(error);
-		}
-	}
-	getAll(_, res) {
-		try {
-			connection.query("SELECT * FROM Staff", (error, results) => {
-				if (error) throw error;
-				res.status(200).json(results);
-			});
+			StaffService.create(req.body);
+			res.status(200).json(req.body);
 		} catch (error) {
 			res.status(500).json(error);
 		}
 	}
-	getOne(req, res) {
+	async getAll(_, res) {
+		try {
+			const data = await StaffService.getAll();
+			res.status(200).json(data);
+		} catch (error) {
+			res.status(500).json(error);
+		}
+	}
+	async getOne(req, res) {
 		try {
 			const { id } = req.params;
 
-			connection.query(
-				`SELECT * FROM Staff WHERE StaffId = ${id}`,
-				(error, results) => {
-					if (error) throw error;
-					res.status(200).json(results);
-				},
-			);
+			const data = await StaffService.getOne(id);
+			res.status(200).json(data);
 		} catch (error) {
 			res.status(500).json(error);
 		}
 	}
 	update(req, res) {
 		try {
-			const { StaffId, Login, PasswordHash, Salt } = req.body;
+			const staff = req.body;
 
-			if (!StaffId) {
-				res.status(400).json({message: "Id is required"});
+			if (!staff.StaffId) {
+				res.status(400).json({ message: "Id is required" });
 			}
-			connection.query(
-				`UPDATE Staff SET Login='${Login}', PasswordHash='${PasswordHash}', Salt='${Salt}' WHERE StaffId = ${StaffId}`,
-				(error, results) => {
-					if (error) throw error;
-					res.status(200).json(req.body);
-				},
-			);
+
+			StaffService.update(staff);
+
+			res.status(200).json(staff)
+
 		} catch (error) {
 			res.status(500).json(error);
 		}
@@ -62,16 +46,11 @@ class StaffController {
 	delete(req, res) {
 		try {
 			const { id } = req.params;
-            if (!id) {
-                res.status(400).json({message: "Id is required"})
-            }
-			connection.query(
-				`DELETE FROM Staff WHERE StaffId=${id}`,
-				(error, results) => {
-					if (error) throw error;
-					res.status(200).json(results);
-				},
-			);
+			if (!id) {
+				res.status(400).json({ message: "Id is required" });
+			}
+			StaffService.delete(id);
+			res.status(200).json({ message: "succesfully deleted" });
 		} catch (error) {
 			res.status(500).json(error);
 		}

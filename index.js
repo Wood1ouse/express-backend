@@ -11,8 +11,7 @@ app.use(express.json());
 
 app.use("/api", router);
 
-app.get("/", (req, res) => {
-	console.log(req.query);
+app.get("/", (_, res) => {
 	res.status(200).json("SERVER IS UP");
 });
 
